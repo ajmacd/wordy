@@ -1,0 +1,21 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.list li {
+  cursor: pointer;
+  font-family: var(--font-mono, monospace);
+  font-size: 1rem;
+  color: var(--text-color, #eee);
+  user-select: none;
+}
+
+.found {
+  text-decoration: line-through;
+  color: var(--found-color, #888);
+}
