@@ -9,8 +9,8 @@ import (
 
 // fetchRandomWords hits the Vercel API for `count` words,
 // upper-cases them, and returns the slice or an error.
-func fetchRandomWords(count int) ([]string, error) {
-	url := fmt.Sprintf("https://random-word-api.vercel.app/api?words=%d", count)
+func fetchRandomWords(count int, length int) ([]string, error) {
+	url := fmt.Sprintf("https://random-word-api.vercel.app/api?words=%d&length=%d", count, length)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("fetchRandomWords: HTTP GET failed: %w", err)
