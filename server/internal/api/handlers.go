@@ -10,12 +10,14 @@ import (
 
 // PuzzleHandler returns a static puzzle.
 func PuzzleHandler(w http.ResponseWriter, r *http.Request) {
-	resp := puzzle.Generate()
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	resp, err := puzzle.Generate()
+	if err != nil {
+		log.Printf("Error generating puzzle: %v\n", err)
+		http.Error(w, "Puzzle generation failed", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }
 
 // FoundHandler logs when a client reports a found word.

@@ -5,8 +5,8 @@ import "net/http"
 // NewRouter wires up all API routes.
 func NewRouter() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/puzzle", PuzzleHandler)
-	mux.HandleFunc("/found", FoundHandler)
+	mux.HandleFunc("/api/puzzle", PuzzleHandler)
+	mux.HandleFunc("/api/found", FoundHandler)
 	return mux
 }
 
