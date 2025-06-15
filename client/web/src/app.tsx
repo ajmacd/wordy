@@ -1,8 +1,9 @@
 import { useEffect, useState } from "preact/hooks";
 import { Grid } from "./grid";
+import { LoadingGrid } from "./loading-grid";
 import { fetchPuzzle } from "./api";
 
-export default function App() {
+export function App() {
   const [grid, setGrid] = useState<string[][] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +19,7 @@ export default function App() {
     <div style={{ maxWidth: "400px", margin: "0 auto", padding: "16px" }}>
       <h1 style={{ textAlign: "center" }}>Wordy</h1>
       {loading ? (
-        <p>Loading grid...</p>
+        <LoadingGrid />
       ) : grid ? (
         <Grid grid={grid} />
       ) : (

@@ -11,7 +11,7 @@ export async function fetchPuzzle(): Promise<{
           grid: Array.from({ length: 10 }, () => Array(10).fill("")),
           words: [],
         }),
-      1000
+      5000
     )
   );
 }

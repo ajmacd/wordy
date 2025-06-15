@@ -1,3 +1,5 @@
+import styles from "./Grid.module.css";
+
 interface GridProps {
   grid: string[][];
 }
@@ -7,7 +9,7 @@ export function Grid({ grid }: GridProps) {
     <div className={styles.grid}>
       {grid.map((row, r) =>
         row.map((cell, c) => (
-          <div key={`${r}-${c}`} className={styles.cell}>
+          <div key={`${r}-${c}`} className={`${styles.skeletonCell}`}>
             {cell}
           </div>
         ))

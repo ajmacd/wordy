@@ -1,16 +1,23 @@
 .grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 4px;
-  }
-  
-  .cell {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    user-select: none;
-  }
-  
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.cell {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #555;
+  color: var(--text-color);
+}
+
+.skeletonCell {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #555;
+  background-color: var(--skeleton-dark);
+}
