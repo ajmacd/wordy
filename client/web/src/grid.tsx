@@ -6,9 +6,11 @@ export interface GridProps {
   grid: string[][];
   /** Called once, on mouse-up, with the list of [row, col] pairs */
   onSelectionComplete?: (cells: [number, number][]) => void;
+  /** Map of word → array of [row,col] for cells that are found */
+  foundPaths?: Record<string, [number, number][]>;
 }
 
-export function Grid({ grid, onSelectionComplete }: GridProps) {
+export function Grid({ grid, onSelectionComplete, foundPaths }: GridProps) {
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedCells, setSelectedCells] = useState<[number, number][]>([]);
 
@@ -46,16 +48,24 @@ export function Grid({ grid, onSelectionComplete }: GridProps) {
     <div className={styles.grid}>
       {grid.map((row, r) =>
         row.map((letter, c) => {
-          // check if this cell is currently selected
           const isSelected = selectedCells.some(
             ([sr, sc]) => sr === r && sc === c
           );
+
+          const isFound = foundPaths
+            ? Object.values(foundPaths).some((path) =>
+                path.some(([fr, fc]) => fr === r && fc === c)
+              )
+            : false;
+
           return (
             <div
               key={`${r}-${c}`}
-              className={`${styles.cell} ${
-                isSelected ? styles.selectedCell : ""
-              }`}
+              className={[
+                styles.cell,
+                isSelected ? styles.selectedCell : "",
+                isFound ? styles.foundCell : "",
+              ].join(" ")}
               onMouseDown={() => handleMouseDown(r, c)}
               onMouseEnter={() => handleMouseEnter(r, c)}
             >

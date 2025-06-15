@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { Grid } from "./grid";
 import { LoadingGrid } from "./loading-grid";
-import { fetchPuzzle } from "./api";
+import { fetchPuzzle, reportFound } from "./api";
 import { WordList } from "./word-list";
 
 export function App() {
@@ -10,13 +10,15 @@ export function App() {
 
   const [words, setWords] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<Set<string>>(() => new Set());
+  const [foundPaths, setFoundPaths] = useState<
+    Record<string, [number, number][]>
+  >({});
 
   useEffect(() => {
     (async () => {
       const data = await fetchPuzzle();
       setGrid(data.grid);
       setWords(data.words);
-      setFoundWords(new Set());
       setLoading(false);
     })();
   }, []);
@@ -45,7 +47,12 @@ export function App() {
       }
       // If we found a word, toggle its found state
       if (matched) {
+        setFoundPaths((prev) => ({
+          ...prev,
+          [matched]: cells,
+        }));
         toggleFound(matched);
+        reportFound(matched).catch(console.error);
       }
     },
     [grid, words, toggleFound]
@@ -57,7 +64,11 @@ export function App() {
         <LoadingGrid />
       ) : grid ? (
         <>
-          <Grid grid={grid} onSelectionComplete={handleSelectionComplete} />
+          <Grid
+            grid={grid}
+            onSelectionComplete={handleSelectionComplete}
+            foundPaths={foundPaths}
+          />
           <WordList words={words} found={foundWords} onToggle={toggleFound} />
         </>
       ) : (

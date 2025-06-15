@@ -22,6 +22,10 @@
   background-color: rgba(0, 128, 255, 0.3);
 }
 
+.foundCell {
+  background-color: rgba(0, 128, 0, 0.4);
+}
+
 .skeletonCell {
   position: relative;
   width: 32px;
