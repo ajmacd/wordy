@@ -1,26 +1,8 @@
-// Generate returns a deterministic 10×10 puzzle and word list.
-//
-//	func Generate() PuzzleResponse {
-//		return PuzzleResponse{
-//			Grid: [][]string{
-//				{"C", "A", "T", "U", "D", "A", "X", "I", "H", "H"},
-//				{"E", "X", "D", "D", "O", "G", "V", "X", "R", "C"},
-//				{"S", "B", "I", "R", "D", "N", "B", "A", "C", "G"},
-//				{"H", "Q", "T", "A", "R", "G", "F", "W", "U", "W"},
-//				{"R", "N", "H", "O", "S", "I", "I", "Z", "A", "Y"},
-//				{"Z", "F", "W", "N", "K", "I", "S", "E", "G", "Y"},
-//				{"K", "D", "C", "M", "D", "L", "H", "L", "T", "I"},
-//				{"Z", "B", "X", "O", "R", "D", "M", "C", "R", "J"},
-//				{"U", "T", "L", "S", "G", "W", "C", "B", "V", "H"},
-//				{"Y", "J", "C", "H", "D", "M", "I", "O", "U", "L"},
-//			},
-//			Words: []string{"CAT", "DOG", "BIRD", "FISH"},
-//		}
-//	}
 package puzzle
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 )
 
@@ -29,8 +11,12 @@ const (
 	maxPlaceTries = 100
 )
 
-// Direction vectors for 8 possible orientations
-var directions = [8][2]int{
+type Direction struct {
+	dr int // row delta
+	dc int // col delta
+}
+
+var directions = []Direction{
 	{0, 1},  // right
 	{1, 0},  // down
 	{0, -1}, // left
@@ -41,52 +27,65 @@ var directions = [8][2]int{
 	// {-1, -1}, // up-left
 }
 
-// Generate constructs a grid with the given words placed randomly.
 func Generate() (PuzzleResponse, error) {
-	// Fetch random words
+	// 1) Fetch words
 	const wordCount = 5
-	const wordLength = 5
+	const wordLength = 4
 	words, err := fetchRandomWords(wordCount, wordLength)
 	if err != nil {
 		return PuzzleResponse{}, fmt.Errorf("Generate: %w", err)
 	}
+	log.Printf("Generate: placing words %v\n", words)
 
-	// Initialize empty grid with placeholders
+	// 2) Create an empty grid (zero runes)
 	grid := make([][]rune, gridSize)
 	for i := range grid {
 		grid[i] = make([]rune, gridSize)
-		for j := range grid[i] {
-			grid[i][j] = 0
-		}
 	}
 
-	// Place each word
+	// 3) Place each word on the empty grid
 	for _, w := range words {
 		placed := false
-		for try := 0; try < maxPlaceTries && !placed; try++ {
+		log.Printf("  Word %q: starting placement\n", w)
+		for attempt := 1; attempt <= maxPlaceTries; attempt++ {
+			// pick dir, then a valid (r,c) so word stays in-bounds
 			dir := directions[rand.Intn(len(directions))]
+			dr, dc := dir.dr, dir.dc
+
 			r := rand.Intn(gridSize)
 			c := rand.Intn(gridSize)
-			if canPlace(grid, w, r, c, dir) {
-				placeWord(grid, w, r, c, dir)
-				placed = true
+
+			ok := canPlace(grid, w, r, c, dir)
+			log.Printf("    Attempt %2d: r=%d c=%d dir=(%d,%d) canPlace=%v",
+				attempt, r, c, dr, dc, ok)
+
+			if !ok {
+				continue
 			}
+			placeWord(grid, w, r, c, dir)
+			log.Printf("    Placed %q at (r=%d,c=%d) dir=(%d,%d)",
+				w, r, c, dr, dc)
+			placed = true
+			break
 		}
 		if !placed {
-			return PuzzleResponse{}, fmt.Errorf("could not place word %q after %d tries", w, maxPlaceTries)
+			return PuzzleResponse{}, fmt.Errorf(
+				"Generate: failed to place word %q after %d tries",
+				w, maxPlaceTries,
+			)
 		}
 	}
 
-	// Fill empty cells with random letters
-	for i := range gridSize {
-		for j := range gridSize {
+	// 4) Fill every empty cell with random letters
+	for i := range grid {
+		for j := range grid[i] {
 			if grid[i][j] == 0 {
 				grid[i][j] = rune(rand.Intn(26) + 'A')
 			}
 		}
 	}
 
-	// Convert rune grid to string grid
+	// 5) Convert to string grid and return
 	strGrid := make([][]string, gridSize)
 	for i := range grid {
 		strGrid[i] = make([]string, gridSize)
@@ -94,19 +93,17 @@ func Generate() (PuzzleResponse, error) {
 			strGrid[i][j] = string(r)
 		}
 	}
-
 	return PuzzleResponse{Grid: strGrid, Words: words}, nil
 }
 
-// canPlace checks if word w can fit into grid starting at (r,c) moving in dir
-func canPlace(grid [][]rune, w string, r, c int, dir [2]int) bool {
-	dr, dc := dir[0], dir[1]
+func canPlace(grid [][]rune, w string, r, c int, dir Direction) bool {
+	dr, dc := dir.dr, dir.dc
 	for _, ch := range w {
-		// Check bounds
+		// bounds
 		if r < 0 || r >= gridSize || c < 0 || c >= gridSize {
 			return false
 		}
-		// Check conflict: either empty or same letter
+		// collision: cell must be empty or match this letter
 		if grid[r][c] != 0 && grid[r][c] != ch {
 			return false
 		}
@@ -116,9 +113,8 @@ func canPlace(grid [][]rune, w string, r, c int, dir [2]int) bool {
 	return true
 }
 
-// placeWord writes word w into grid at (r,c) moving in dir
-func placeWord(grid [][]rune, w string, r, c int, dir [2]int) {
-	dr, dc := dir[0], dir[1]
+func placeWord(grid [][]rune, w string, r, c int, dir Direction) {
+	dr, dc := dir.dr, dir.dc
 	for _, ch := range w {
 		grid[r][c] = ch
 		r += dr
