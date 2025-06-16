@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ajmacd/wordy/internal/puzzle"
+	"github.com/ajmacd/wordy/server/internal/puzzle"
 )
 
 // PuzzleHandler returns a static puzzle.

@@ -5,27 +5,24 @@
       "src": "client/web/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "client/web/dist",
-        "buildCommand": "npm run build"
+        "distDir": "dist",
+        "buildCommand": "npm install && npm run build"
       }
     },
     {
-      "src": "server/cmd/api/main.go",
+      "src": "server/cmd/api/*.go",
       "use": "@vercel/go"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "server/cmd/api/main.go"
+      "source": "/api/:match",
+      "destination": "/server/cmd/api/:match.go"
     },
     {
-      "src": "/(.*)\\.(js|css|png|svg|ico)$",
-      "dest": "client/web/dist/$1.$2"
+      "source": "/assets/:file",
+      "destination": "/client/web/assets/:file"
     },
-    {
-      "src": "/(.*)",
-      "dest": "client/web/dist/index.html"
-    }
+    { "source": "/(.*)", "destination": "/client/web/index.html" }
   ]
 }

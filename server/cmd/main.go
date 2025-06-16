@@ -1,16 +1,27 @@
-package api
+package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
 
-// NewRouter wires up all API routes.
+	api "github.com/ajmacd/wordy/server"
+)
+
+func main() {
+	mux := NewRouter()
+	handler := WithCORS(mux)
+
+	log.Println("Listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", handler))
+}
+
 func NewRouter() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/puzzle", PuzzleHandler)
-	mux.HandleFunc("/api/found", FoundHandler)
+	mux.HandleFunc("/api/puzzle", api.PuzzleHandler)
+	mux.HandleFunc("/api/found", api.FoundHandler)
 	return mux
 }
 
-// WithCORS wraps any handler to allow cross-origin requests.
 func WithCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
